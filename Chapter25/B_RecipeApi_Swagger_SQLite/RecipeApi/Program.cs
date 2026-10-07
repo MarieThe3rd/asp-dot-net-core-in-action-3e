@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,18 +24,16 @@ builder.Services.AddSwaggerGen(x =>
         // Scheme = "Bearer", // Optional, not used by swashbuckle in this case
         // BearerFormat = "JWT", // Optional, not used by swashbuckle in this case
         Description = "JWT Authorization header using the Bearer scheme.",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
     };
 
     // Register the authentication requirements
-    x.AddSecurityDefinition(security.Reference.Id, security);
+    x.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, security);
 
     // Enable the requirement globally
-    x.AddSecurityRequirement(new OpenApiSecurityRequirement { { security, Array.Empty<string>() } });
+    x.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, document)] = []
+    });
 });
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");

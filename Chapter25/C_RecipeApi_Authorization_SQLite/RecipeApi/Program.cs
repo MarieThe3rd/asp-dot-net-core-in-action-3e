@@ -4,7 +4,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using RecipeApi.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,14 +30,12 @@ builder.Services.AddSwaggerGen(x =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme.",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
     };
-    x.AddSecurityDefinition(security.Reference.Id, security);
-    x.AddSecurityRequirement(new OpenApiSecurityRequirement { { security, Array.Empty<string>() } });
+    x.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, security);
+    x.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, document)] = []
+    });
 });
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
